@@ -45,7 +45,7 @@ public:
 /*! 
   Sets the neurons parameters to non-default values.
   \param _types : a vector of \ref Neuron::NeuronTypes.
-  \param _par : a vector of parameter values (\ref NeuronParams).
+  \param _par : a vector of parameter values ( \ref NeuronParams).
   \param _start : index of starting neuron in \ref neurons.
  */
     void set_types_params(const std::vector<std::string>&,
@@ -86,7 +86,7 @@ public:
   \param n : the index of the receiving neuron.
   \return a vector of pairs {neuron index, link intensity}.
  */
-    std::vector<std::pair<size_t, double> > neighbors(const size_t&) const;
+    std::vector<std::pair<size_t, double> > neighbors(const size_t& n) const;
     std::vector<double> potentials() const;
     std::vector<double> recoveries() const;
 /*! 

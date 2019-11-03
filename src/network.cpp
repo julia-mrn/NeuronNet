@@ -62,6 +62,40 @@ size_t Network::random_connect(const double &mean_deg, const double &mean_streng
     return num_links;
 }
 
+
+
+
+
+std::pair<size_t, double> Network::degree(const size_t& n) const{
+	
+	size_t connections_nbr = neighbors(n).size();
+	double tot_intensity(0);
+	for (auto I : neighbors(n)) {
+		tot_intensity += I.second;
+	}
+	std::pair<size_t, double> degree(connections_nbr, tot_intensity);
+	return degree;
+	
+	
+}
+
+
+std::vector<std::pair<size_t, double>> Network::neighbors(const size_t& n) const{ 
+	
+	std::vector<std::pair<size_t, double> > neighbors; 
+	
+	for (std::map<std::pair<size_t, size_t>, double>::const_iterator i = links.lower_bound({n,0}); i!=links.end() and ((i->first).first == n); ++i) {
+		
+		std::pair<size_t, double>one_neighbor((i->first).second, i->second);
+		
+		neighbors.push_back(one_neighbor);
+	}
+	
+	return neighbors;
+	
+}
+
+
 std::vector<double> Network::potentials() const {
     std::vector<double> vals;
     for (size_t nn=0; nn<size(); nn++)
@@ -75,6 +109,64 @@ std::vector<double> Network::recoveries() const {
         vals.push_back(neurons[nn].recovery());
     return vals;
 }
+
+ std::set<size_t> Network::step(const std::vector<double>& vect){
+	 
+	std::set<size_t> firing;
+	
+	for (size_t i=0; i < size(); ++i) {
+		
+		if (neurons[i].firing()){ // identify firing neurons 
+			firing.insert(i); // create set of firing neurons 
+			neurons[i].reset();
+		}
+	}
+		
+		
+	for (size_t i= 0; i < size(); ++i) {	
+		
+		
+	if (!neurons[i].firing()){
+				
+			double input_(0);
+		
+			for (auto voisin : neighbors(i)) { // iteration on the neighbors table 
+			
+				for (auto fire : firing) { 
+				
+					if (voisin.first == fire) { // allow us to know if the neighbor "voisin" is a firing neuron // we cannot use the Neuron::firing() function because the potential of a firing has already been reset
+	
+						if (neurons[voisin.first].is_inhibitory()) {	
+						input_ += voisin.second;
+						} 
+						else {
+						input_ += 0.5*voisin.second;
+						};	//calculation of the current (input) received by neuron i, depending on firing neighbors 
+					}; 
+			
+				} ;
+			};
+		
+			if(neurons[i].is_inhibitory()) {	
+			input_ += 0.4*vect[i]; 
+			}
+			else {
+			input_ += vect[i];
+			} // the current received by neuron i depends also on thalamic input 
+		
+		
+		
+			neurons[i].input(input_); //update of the "input" of neuron i 
+		
+			neurons[i].step();		//update the variables u and v for each neuron 
+		
+	
+		}; 
+	}
+	
+	 return firing; 
+}
+	
 
 void Network::print_params(std::ostream *_out) {
     (*_out) << "Type\ta\tb\tc\td\tInhibitory\tdegree\tvalence" << std::endl;

@@ -38,7 +38,7 @@ public:
   One step of time evolution: \ref _poten and \ref _recov are updated according to the Izhikevich equations.
  */
     void step();
-    void potential(const double &_p) {_poten = _p;}
+    void  potential(const double &_p) {_poten = _p;}
     double potential() const {return _poten;}
     double recovery() const {return _recov;}
     void input(const double i) {_input=i;}
